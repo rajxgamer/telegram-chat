@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login / Sign Up</title>
+  <style>
+    body {
+      font-family: Arial;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+    .box {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+    input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .tab {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .tab button {
+      width: 48%;
+      background: #eee;
+      color: #000;
+    }
+    .tab button.active {
+      background: #4CAF50;
+      color: white;
+    }
+    .error {
+      color: red;
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="tab">
+      <button id="loginTab" class="active" onclick="switchTab('login')">Login</button>
+      <button id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginBtn" onclick="login()">Login</button>
+    <button id="signupBtn" style="display:none" onclick="signup()">Sign Up</button>
+    <div id="error" class="error"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPyjBMsPxZAIfYVwdBGnjSJBXsUWtWB4I",
+      authDomain: "chatting-7281d.firebaseapp.com",
+      databaseURL: "https://chatting-7281d-default-rtdb.firebaseio.com",
+      projectId: "chatting-7281d",
+      storageBucket: "chatting-7281d.firebasestorage.app",
+      messagingSenderId: "231478444832",
+      appId: "1:231478444832:web:0b785abb3efc483391cd45"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function switchTab(tab) {
+      const loginBtn = document.getElementById('loginBtn');
+      const signupBtn = document.getElementById('signupBtn');
+      document.getElementById('error').textContent = "";
+
+      if (tab === 'login') {
+        loginBtn.style.display = "block";
+        signupBtn.style.display = "none";
+        document.getElementById('loginTab').classList.add('active');
+        document.getElementById('signupTab').classList.remove('active');
+      } else {
+        loginBtn.style.display = "none";
+        signupBtn.style.display = "block";
+        document.getElementById('signupTab').classList.add('active');
+        document.getElementById('loginTab').classList.remove('active');
+      }
+    }
+
+    function signup() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const error = document.getElementById("error");
+
+      if (!username || !password) {
+        error.textContent = "Enter both username and password.";
+        return;
+      }
+
+      db.ref("accounts/" + username).once("value").then(snapshot => {
+        if (snapshot.exists()) {
+          error.textContent = "Username already exists.";
+        } else {
+          db.ref("accounts/" + username).set({ password });
+          db.ref("users/" + username).set(true);
+          localStorage.setItem("username", username);
+          localStorage.setItem("password", password);
+          window.location.href = "chat.html";
+        }
+      });
+    }
+
+    function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const error = document.getElementById("error");
+
+      if (!username || !password) {
+        error.textContent = "Enter both username and password.";
+        return;
+      }
+
+      db.ref("accounts/" + username).once("value").then(snapshot => {
+        if (!snapshot.exists()) {
+          error.textContent = "Username not found.";
+        } else if (snapshot.val().password !== password) {
+          error.textContent = "Incorrect password.";
+        } else {
+          db.ref("users/" + username).set(true);
+          localStorage.setItem("username", username);
+          localStorage.setItem("password", password);
+          window.location.href = "chatlist.html";
+        }
+      });
+    }
+  </script>
+</body>
+</html>

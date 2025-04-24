@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Select User</title>
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: Arial;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #2a2a2a;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    li:hover {
+      background: #00caff;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Select User to Chat</h2>
+  <ul id="userList"></ul>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPyjBMsPxZAIfYVwdBGnjSJBXsUWtWB4I",
+      authDomain: "chatting-7281d.firebaseapp.com",
+      databaseURL: "https://chatting-7281d-default-rtdb.firebaseio.com",
+      projectId: "chatting-7281d",
+      storageBucket: "chatting-7281d.appspot.com",
+      messagingSenderId: "231478444832",
+      appId: "1:231478444832:web:0b785abb3efc483391cd45"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const currentUser = localStorage.getItem("username");
+    if (!currentUser) location.href = "index.html";
+
+    db.ref("accounts").once("value").then(snapshot => {
+      const users = snapshot.val() || {};
+      const list = document.getElementById("userList");
+
+      Object.keys(users).forEach(name => {
+        if (name !== currentUser) {
+          const li = document.createElement("li");
+          li.textContent = name;
+          li.onclick = () => {
+            window.location.href = `personal.html?to=${name}`;
+          };
+          list.appendChild(li);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
